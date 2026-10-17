@@ -134,10 +134,14 @@ async def process_last_name(message: types.Message, state: FSMContext):
 
 @dp.message(RegState.waiting_for_phone, lambda message: message.contact is not None)
 async def process_phone(message: types.Message, state: FSMContext):
-    phone = message.contact.phone_number
-    if not phone.startswith("+"):
-        phone = "+" + phone
-        
+    raw_phone = message.contact.phone_number
+    
+    # Очищаем номер от всех символов, оставляя ТОЛЬКО цифры (без плюса)
+    phone = re.sub(r'\D', '', raw_phone)
+    
+    if phone.startswith('8') and len(phone) == 11:
+        phone = '7' + phone[1:]
+
     data = await state.get_data()
     iin = data.get('iin')
     first_name = data.get('first_name')
